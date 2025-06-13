@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { PriceConvertor } from './PriceConvertor.sol';
+import {AggregatorV3Interface} from "../lib/chainlink-brownie-contracts/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 error FundMe__notOwner();
 
@@ -12,13 +13,15 @@ contract FundMe {
     address[] public funders;
     mapping(address => uint256) public accountSentMoney;
     address public immutable i_owner; 
+    AggregatorV3Interface private price_feed;
 
-    constructor(){
+    constructor(address _priceFeed){
         i_owner = msg.sender;
+        price_feed = AggregatorV3Interface(_priceFeed);
     }
 
     function fund() public payable { 
-        require(msg.value.getConversionRate() >= MINIMUM_USD, "Didn't send enought eth");
+        require(msg.value.getConversionRate(price_feed) >= MINIMUM_USD, "Didn't send enought eth");
         
         funders.push(msg.sender);
         accountSentMoney[msg.sender] += msg.value;
@@ -32,6 +35,10 @@ contract FundMe {
         funders = new address[](0);
         (bool callCheck, ) = payable(msg.sender).call{value:address(this).balance}("");
         require(callCheck,"Call failed");
+    }
+
+    function testDemo()public pure returns(uint256){
+        return 9;
     }
 
     modifier onlyOwner(){
