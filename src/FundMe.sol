@@ -41,6 +41,10 @@ contract FundMe {
         return 9;
     }
 
+    function versionCheck() public view returns(uint256) {
+        return price_feed.version();
+    }
+
     modifier onlyOwner(){
         if(msg.sender != i_owner){
             revert FundMe__notOwner(); 

@@ -6,6 +6,9 @@ pragma solidity ^0.8.18;
 import {Script} from 'forge-std/Script.sol';
 import {MockV3Aggregator} from '../test/mocks/Mockv3Aggregator.sol';
 contract HelperConfig is Script{
+    
+    uint8 public constant DECIMAL =8;
+    int256 public constant INITIAL_PRICE = 2000e8;
 
     struct NetwrokConfig{
         address priceFeed;
@@ -28,9 +31,12 @@ contract HelperConfig is Script{
         return sepoliaConfig;
     }
 
-    function getAnvilPriceConfig () external returns(NetwrokConfig memory){
+    function getAnvilPriceConfig () public returns(NetwrokConfig memory){
+        if(activeNetwork.priceFeed != address(0)){
+            return activeNetwork;
+        }
         vm.startBroadcast();
-        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(8, 2000e8);
+        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(DECIMAL, INITIAL_PRICE);
         vm.stopBroadcast();
         NetwrokConfig memory anvilConfig = NetwrokConfig({
             priceFeed : address(mockV3Aggregator)

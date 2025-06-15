@@ -21,6 +21,11 @@ contract FundMeTest is Test{
         assertEq(fundMe.i_owner(), msg.sender);
     }
 
+    function testCheckVersion() public view{
+        uint256 versionCheck = fundMe.versionCheck();
+        assertEq(versionCheck , 4);
+    }
+
 
     function testTestDemo()public view{
         uint256 numberChecker = fundMe.testDemo();
