@@ -2,8 +2,8 @@
 pragma solidity ^0.8.18;
 
 import {Test, console} from 'forge-std/Test.sol';
-import {FundMe} from '../src/FundMe.sol';
-import {FundMeDeploy } from '../script/DeployFundMe.s.sol';
+import {FundMe} from '../../src/FundMe.sol';
+import {FundMeDeploy } from '../../script/DeployFundMe.s.sol';
 contract FundMeTest is Test{
     FundMe fundMe;
     address USER = makeAddr("User");
@@ -89,6 +89,24 @@ contract FundMeTest is Test{
 
         vm.prank(fundMe.getOwner());
         fundMe.withdraw();
+
+        assert(address(fundMe).balance == 0);
+        assert(funderOwner+startingFundMeBalance == fundMe.getOwner().balance);
+    }
+
+    function testWithdrawWithMultipleFundersCheap()public funded{
+        uint160 numberOfFunders = 10;
+        uint160 funderIndex =1;
+        for(uint160 i = funderIndex;i < numberOfFunders; i++){
+            hoax(address(i),SEND_VALUE);
+            fundMe.fund{value:SEND_VALUE}();
+        }
+
+        uint256 funderOwner = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        vm.prank(fundMe.getOwner());
+        fundMe.cheapWithdraw();
 
         assert(address(fundMe).balance == 0);
         assert(funderOwner+startingFundMeBalance == fundMe.getOwner().balance);
